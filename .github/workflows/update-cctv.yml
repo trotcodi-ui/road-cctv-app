@@ -18,6 +18,12 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Diagnose connectivity
+        env:
+          ITS_API_KEY: ${{ secrets.ITS_API_KEY }}
+        run: |
+          curl -v --max-time 15 "https://openapi.its.go.kr:9443/cctvInfo?apiKey=${ITS_API_KEY}&type=ex&cctvType=4&minX=124.0&maxX=132.0&minY=33.0&maxY=39.0&getType=json" || echo "curl exit code: $?"
+
       - name: Fetch CCTV data from ITS
         env:
           ITS_API_KEY: ${{ secrets.ITS_API_KEY }}
