@@ -1,0 +1,32 @@
+name: Update CCTV Cache
+
+on:
+  schedule:
+    - cron: '0 18 * * *'
+    - cron: '0 6 * * *'
+  workflow_dispatch: {}
+
+jobs:
+  update-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch CCTV data from ITS
+        env:
+          ITS_API_KEY: ${{ secrets.ITS_API_KEY }}
+        run: node scripts/fetch-cctv.js
+
+      - name: Commit updated cache
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/cctv-cache.json
+          git diff --cached --quiet && echo "변경 없음, 커밋 스킵" || git commit -m "chore: update cctv cache ($(date -u +%Y-%m-%dT%H:%M:%SZ))"
+          git push
